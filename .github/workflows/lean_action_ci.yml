@@ -2,12 +2,18 @@ name: Lean Action CI
 
 on:
   push:
+    branches:
+      - main
+    paths:
+      - "lean/**"
   pull_request:
+    paths:
+      - "lean/**"
   workflow_dispatch:
 
 jobs:
 
-  build:
+  lean:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
