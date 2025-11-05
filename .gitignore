@@ -2,4 +2,4 @@ tmp/
 *.tmp
 *.log
 *.sw?
-/.lake
+.lake/
