@@ -108,41 +108,63 @@ example : fromNat 3 ∸' fromNat 5 = fromNat 0 := rfl
 
 
 /--
-Binary numbers
+Bit strings
 -/
 inductive Bin where
-| nobit : Bin
+| bits : Bin
 | bit0 : Bin → Bin
 | bit1 : Bin → Bin
-deriving Repr
-open Bin (nobit bit0 bit1)
-postfix:500 " O" => Bin.bit0
-postfix:500 " I" => Bin.bit1
+deriving Repr, DecidableEq
+open Bin (bits bit0 bit1)
+postfix:500 " O" => bit0
+postfix:500 " I" => bit1
 
 
-def binToNat : Bin → Nat :=
-  let rec f : Nat → Bin → Nat
-  | n, nobit => n
-  | n, bit0 nobit => 2 * n
-  | n, bit1 nobit => 2 * n + 1
-  | n, bit0 i => 2 * f n i
-  | n, bit1 i => 2 * f n i + 1
-  f 0
-
-#guard binToNat nobit = 0
-#guard binToNat (nobit O) = 0
-#guard binToNat (nobit I) = 1
-#guard binToNat (nobit I O) = 2
-#guard binToNat (nobit O I) = 1
-#guard binToNat (nobit O I O I) = 5
-#guard binToNat (nobit I O I O I) = 21
-
-
-/-
-def natToBin : Nat → Bin
-  | Nat.zero => bit0 nobit
-  | Nat.succ i
+/--
+Increment a bit string.
 -/
+def inc : Bin → Bin
+| bits => bit1 bits
+| bit0 x => bit1 x
+| bit1 x => bit0 (inc x)
+
+#guard inc (bits O) = bits I
+#guard inc (bits I) = bits I O
+#guard inc (bits O O) = bits O I
+#guard inc (bits O I) = bits I O
+#guard inc (bits I O) = bits I I
+#guard inc (bits I O I I) = bits I I O O
+
+
+/--
+Interpret a natural number as a bit string.
+-/
+def natToBin : Nat → Bin
+  | Nat.zero => bit0 bits
+  | Nat.succ x => inc (natToBin x)
+
+#guard bits O = natToBin 0
+#guard bits I = natToBin 1
+#guard bits I O = natToBin 2
+#guard bits I O I = natToBin 5
+#guard bits I O I O I = natToBin 21
+
+
+/--
+Interpret a bit string as a natural number.
+-/
+def binToNat : Bin → Nat
+| bits => 0
+| bit0 x => 2 * binToNat x
+| bit1 x => 2 * binToNat x + 1
+
+#guard binToNat bits = 0
+#guard binToNat (bits O) = 0
+#guard binToNat (bits I) = 1
+#guard binToNat (bits I O) = 2
+#guard binToNat (bits O I) = 1
+#guard binToNat (bits O I O I) = 5
+#guard binToNat (bits I O I O I) = 21
 
 
 end Part1.Naturals
