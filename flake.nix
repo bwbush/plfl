@@ -53,6 +53,7 @@
           ];
           shellHook = ''
             echo "Entering Nix shell with Lean, Agda, and VS Code..."
+            export PS1="\[\e[1;32m\][nix-shell:\w]$\[\e[m\] "
           '';
         };
     in
