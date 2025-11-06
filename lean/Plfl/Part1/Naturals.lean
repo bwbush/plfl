@@ -37,6 +37,26 @@ infixl:100 " +' " => add
 #guard toNat (fromNat 3 +' fromNat 4) = 7
 
 
+example : zero.suc +' zero.suc = zero.suc.suc :=
+  trans
+    (
+      Eq.mpr
+        (id (congrArg (fun _a => _a = (zero +' zero.suc).suc) (add.eq_2 zero.suc zero)))
+        (Eq.refl (zero +' zero.suc).suc)
+    )
+  (
+    Eq.mpr
+      (id (congrArg (fun _a => _a.suc = zero.suc.suc) (add.eq_1 zero.suc)))
+      (Eq.refl zero.suc.suc)
+  )
+
+example : zero.suc.suc.suc +' zero.suc.suc.suc.suc = zero.suc.suc.suc.suc.suc.suc.suc :=
+  calc
+    zero.suc.suc.suc +' zero.suc.suc.suc.suc = (zero.suc.suc +' zero.suc.suc.suc.suc).suc := add.eq_2 zero.suc.suc zero.suc.suc.suc.suc
+    _                                        = (zero.suc +' zero.suc.suc.suc.suc).suc.suc := congrArg suc (add.eq_2 zero.suc zero.suc.suc.suc.suc)
+    _                                        = (zero +' zero.suc.suc.suc.suc).suc.suc.suc := congrArg (suc ∘ suc) (add.eq_2 zero zero.suc.suc.suc.suc)
+    _                                        = zero.suc.suc.suc.suc.suc.suc.suc           := congrArg suc (add.eq_1 zero.suc.suc.suc.suc.suc.suc)
+
 example : fromNat 3 +' fromNat 4 = fromNat 7 := by
   simp [fromNat]
   rw [add, add]
@@ -153,18 +173,18 @@ def natToBin : Nat → Bin
 /--
 Interpret a bit string as a natural number.
 -/
-def binToNat : Bin → Nat
+def binFromNat : Bin → Nat
 | bits => 0
-| bit0 x => 2 * binToNat x
-| bit1 x => 2 * binToNat x + 1
+| bit0 x => 2 * binFromNat x
+| bit1 x => 2 * binFromNat x + 1
 
-#guard binToNat bits = 0
-#guard binToNat (bits O) = 0
-#guard binToNat (bits I) = 1
-#guard binToNat (bits I O) = 2
-#guard binToNat (bits O I) = 1
-#guard binToNat (bits O I O I) = 5
-#guard binToNat (bits I O I O I) = 21
+#guard binFromNat bits = 0
+#guard binFromNat (bits O) = 0
+#guard binFromNat (bits I) = 1
+#guard binFromNat (bits I O) = 2
+#guard binFromNat (bits O I) = 1
+#guard binFromNat (bits O I O I) = 5
+#guard binFromNat (bits I O I O I) = 21
 
 
 end Part1.Naturals
