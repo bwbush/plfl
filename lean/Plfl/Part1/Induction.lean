@@ -1,5 +1,7 @@
 
-namespace Part1.Induction
+import Plfl.Part1.Naturals
+
+namespace Plfl.Part1.Induction
 
 
 open Nat (zero succ)
@@ -76,4 +78,12 @@ theorem mul_comm : ∀ (m n : Nat), m * n = n * m
                  _          = n * succ m := mul_succ n m
 
 
-end Part1.Induction
+open Plfl.Part1.Naturals -- (ℕ add monus monus.eq_1)
+
+
+theorem zero_monus : ∀ (m : ℕ), monus ℕ.zero m = ℕ.zero
+| ℕ.zero => monus.eq_1 ℕ.zero
+| ℕ.suc m => monus.eq_2 m
+
+
+end Plfl.Part1.Induction
