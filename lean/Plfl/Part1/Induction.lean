@@ -66,5 +66,14 @@ theorem mul_succ : ∀ (m n : Nat), m * succ n = m * n + m
                  _               = m * n + n + succ m     := Eq.symm $ Nat.add_assoc (m * n) n (succ m)
                  _               = succ m * n  + succ m   := congrArg (fun x ↦ x + succ m) (Eq.symm $ Nat.succ_mul m n)
 
+theorem mul_comm : ∀ (m n : Nat), m * n = n * m
+| zero, n => calc
+               zero * n = zero     := Nat.zero_mul n
+               _        = n * zero := Nat.mul_zero n
+| succ m, n => calc
+                 succ m * n = m * n + n  := Nat.succ_mul m n
+                 _          = n * m + n  := congrArg (fun x ↦ x + n) (mul_comm m n)
+                 _          = n * succ m := mul_succ n m
+
 
 end Part1.Induction
