@@ -51,4 +51,20 @@ theorem mul_assoc : ∀ (m n p : Nat), (m * n) * p = m * (n * p)
     rw [Nat.succ_mul, mul_add_dist, mul_assoc, Nat.succ_mul]
 
 
+theorem mul_succ : ∀ (m n : Nat), m * succ n = m * n + m
+| zero, n => calc
+               zero * succ n = zero            := Nat.zero_mul (succ n)
+               _             = zero + zero     := Nat.zero_add zero
+               _             = zero * n + zero := congrArg (fun x ↦ x + zero) (Eq.symm $ Nat.zero_mul n)
+| succ m, n => calc
+                 succ m * succ n = m * succ n + succ n    := Nat.succ_mul m (succ n)
+                 _               = m * n + m + succ n     := congrArg (fun x ↦ x + succ n) (mul_succ m n)
+                 _               = (m * n) + (m + succ n) := Nat.add_assoc (m * n) m (succ n)
+                 _               = m * n + succ (m + n)   := congrArg (fun x ↦ m * n + x) (Nat.add_succ m n)
+                 _               = m * n + succ (n + m)   := congrArg (fun x ↦ m * n + succ x) (Nat.add_comm m n)
+                 _               = m * n + (n + succ m)   := congrArg (fun x ↦ m * n + x) (Nat.add_succ n m)
+                 _               = m * n + n + succ m     := Eq.symm $ Nat.add_assoc (m * n) n (succ m)
+                 _               = succ m * n  + succ m   := congrArg (fun x ↦ x + succ m) (Eq.symm $ Nat.succ_mul m n)
+
+
 end Part1.Induction
