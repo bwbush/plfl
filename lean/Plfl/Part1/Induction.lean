@@ -1,7 +1,10 @@
 
 namespace Part1.Induction
 
+
 open Nat (zero succ)
+
+
 theorem add_swap (m n p : Nat) : m + (n + p) = n + (m + p) :=
   calc
     m + (n + p) = (n + p) + m := Nat.add_comm m (n + p)
@@ -39,6 +42,13 @@ theorem mul_add_dist'' : ∀ (m n p : Nat), (m + n) * p = m * p + n * p
     rw [Nat.succ_add, Nat.succ_mul, mul_add_dist'', Nat.add_comm, ←Nat.add_assoc]
     rw [Nat.add_comm p (m * p)]
     rw [←Nat.succ_mul]
+
+
+theorem mul_assoc : ∀ (m n p : Nat), (m * n) * p = m * (n * p)
+| zero, n, p => by
+    rw [Nat.zero_mul, Nat.zero_mul, Nat.zero_mul]
+| succ m, n, p => by
+    rw [Nat.succ_mul, mul_add_dist, mul_assoc, Nat.succ_mul]
 
 
 end Part1.Induction
