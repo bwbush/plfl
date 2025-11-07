@@ -1071,7 +1071,37 @@ Show that monus associates with addition, that is,
 for all naturals `m`, `n`, and `p`.
 
 ```agda
--- Your code goes here
+∸-+-assoc : ∀ (m n p : ℕ) → m ∸ n ∸ p ≡ m ∸ (n + p)
+∸-+-assoc zero n p =
+  begin
+    zero ∸ n ∸ p
+  ≡⟨ cong (_∸ p) (0∸n≡0 n) ⟩
+    zero ∸ p
+  ≡⟨ 0∸n≡0 p ⟩
+    zero
+  ≡⟨ sym (0∸n≡0 (n + p)) ⟩
+    zero ∸ (n + p)
+  ∎
+∸-+-assoc (suc m) zero p =
+  begin
+    suc m ∸ zero ∸ p
+  ≡⟨⟩
+    suc m ∸ p
+  ≡⟨⟩
+    suc m ∸ (zero + p)
+  ∎
+∸-+-assoc (suc m) (suc n) p =
+  begin
+    suc m ∸ suc n ∸ p
+  ≡⟨⟩
+    m ∸ n ∸ p
+  ≡⟨ ∸-+-assoc m n p ⟩
+    m ∸ (n + p)
+  ≡⟨⟩
+    suc m ∸ suc (n + p)
+  ≡⟨⟩
+    suc m ∸ (suc n + p)
+  ∎
 ```
 
 
