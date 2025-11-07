@@ -1,27 +1,27 @@
 
-namespace Part1.Naturals
+namespace Plfl.Part1.Naturals
 
 
 /--
 Natural numbers
 -/
-inductive ℤ  where
-| zero : ℤ
-| suc : ℤ → ℤ
+inductive ℕ where
+| zero : ℕ
+| suc : ℕ → ℕ
 deriving Repr
-open ℤ (zero suc)
+open ℕ (zero suc)
 
 
-def toNat : ℤ → Nat
+def toNat : ℕ → Nat
 | zero => 0
 | suc i => toNat i + 1
 
-def fromNat : Nat → ℤ
+def fromNat : Nat → ℕ
 | Nat.zero => zero
 | Nat.succ i => suc $ fromNat i
 
 
-def seven : ℤ :=
+def seven : ℕ :=
   suc $ suc $ suc $ suc $ suc $ suc $ suc zero
 #guard toNat seven = 7
 
@@ -29,13 +29,33 @@ def seven : ℤ :=
 /--
 Addition
 -/
-def add : ℤ → ℤ → ℤ
+def add : ℕ → ℕ → ℕ
 | zero, j => j
 | suc i, j => suc $ add i j
 infixl:100 " +' " => add
 
 #guard toNat (fromNat 3 +' fromNat 4) = 7
 
+
+example : zero.suc +' zero.suc = zero.suc.suc :=
+  trans
+    (
+      Eq.mpr
+        (id (congrArg (fun _a => _a = (zero +' zero.suc).suc) (add.eq_2 zero.suc zero)))
+        (Eq.refl (zero +' zero.suc).suc)
+    )
+  (
+    Eq.mpr
+      (id (congrArg (fun _a => _a.suc = zero.suc.suc) (add.eq_1 zero.suc)))
+      (Eq.refl zero.suc.suc)
+  )
+
+example : zero.suc.suc.suc +' zero.suc.suc.suc.suc = zero.suc.suc.suc.suc.suc.suc.suc :=
+  calc
+    zero.suc.suc.suc +' zero.suc.suc.suc.suc = (zero.suc.suc +' zero.suc.suc.suc.suc).suc := add.eq_2 zero.suc.suc zero.suc.suc.suc.suc
+    _                                        = (zero.suc +' zero.suc.suc.suc.suc).suc.suc := congrArg suc (add.eq_2 zero.suc zero.suc.suc.suc.suc)
+    _                                        = (zero +' zero.suc.suc.suc.suc).suc.suc.suc := congrArg (suc ∘ suc) (add.eq_2 zero zero.suc.suc.suc.suc)
+    _                                        = zero.suc.suc.suc.suc.suc.suc.suc           := congrArg suc (add.eq_1 zero.suc.suc.suc.suc.suc.suc)
 
 example : fromNat 3 +' fromNat 4 = fromNat 7 := by
   simp [fromNat]
@@ -48,7 +68,7 @@ example : fromNat 3 +' fromNat 4 = fromNat 7 := rfl
 /--
 Multiplication
 -/
-def mul : ℤ → ℤ → ℤ
+def mul : ℕ → ℕ → ℕ
 | zero, _ => zero
 | suc i, j => add j (mul i j)
 infixl:200 " *' " => mul
@@ -66,7 +86,7 @@ example : fromNat 2 *' fromNat 3 = fromNat 6 := rfl
 /--
 Powers
 -/
-def pow : ℤ → ℤ → ℤ
+def pow : ℕ → ℕ → ℕ
   | _, zero => suc zero
   | i, suc j => mul i (pow i j)
 infixl:300 " ^' " => pow
@@ -84,11 +104,15 @@ example : fromNat 3 ^' fromNat 4 = fromNat 81 := rfl
 /--
 Monus
 -/
-def monus : ℤ → ℤ → ℤ
+def monus : ℕ → ℕ → ℕ
 | i, zero => i
 | zero, suc _ => zero
 | suc i, suc j => monus i j
 infixl:100 " ∸' " => monus
+
+#check monus.eq_1
+#check monus.eq_2
+#check monus.eq_3
 
 #guard toNat (fromNat 3 ∸' fromNat 1) = 2
 #guard toNat (fromNat 3 ∸' fromNat 4) = 0
@@ -153,18 +177,18 @@ def natToBin : Nat → Bin
 /--
 Interpret a bit string as a natural number.
 -/
-def binToNat : Bin → Nat
+def binFromNat : Bin → Nat
 | bits => 0
-| bit0 x => 2 * binToNat x
-| bit1 x => 2 * binToNat x + 1
+| bit0 x => 2 * binFromNat x
+| bit1 x => 2 * binFromNat x + 1
 
-#guard binToNat bits = 0
-#guard binToNat (bits O) = 0
-#guard binToNat (bits I) = 1
-#guard binToNat (bits I O) = 2
-#guard binToNat (bits O I) = 1
-#guard binToNat (bits O I O I) = 5
-#guard binToNat (bits I O I O I) = 21
+#guard binFromNat bits = 0
+#guard binFromNat (bits O) = 0
+#guard binFromNat (bits I) = 1
+#guard binFromNat (bits I O) = 2
+#guard binFromNat (bits O I) = 1
+#guard binFromNat (bits O I O I) = 5
+#guard binFromNat (bits I O I O I) = 21
 
 
-end Part1.Naturals
+end Plfl.Part1.Naturals
