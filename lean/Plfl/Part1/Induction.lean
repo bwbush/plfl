@@ -78,12 +78,27 @@ theorem mul_comm : ∀ (m n : Nat), m * n = n * m
                  _          = n * succ m := mul_succ n m
 
 
-open Plfl.Part1.Naturals -- (ℕ add monus monus.eq_1)
+open Plfl.Part1.Naturals
 
 
-theorem zero_monus : ∀ (m : ℕ), monus ℕ.zero m = ℕ.zero
+theorem zero_monus : ∀ (m : ℕ), ℕ.zero ∸' m = ℕ.zero
 | ℕ.zero => monus.eq_1 ℕ.zero
 | ℕ.suc m => monus.eq_2 m
+
+
+theorem monus_add_assoc : ∀ (m n p : ℕ), m ∸' n ∸' p = m ∸' (n +' p)
+| ℕ.zero, n, p => calc
+                    ℕ.zero ∸' n ∸' p = ℕ.zero ∸' p        := congrArg (fun x ↦ x ∸' p) (zero_monus n)
+                  _                  = ℕ.zero             := zero_monus p
+                  _                  = ℕ.zero ∸' (n +' p) := Eq.symm $ zero_monus (n +' p)
+| ℕ.suc m, ℕ.zero, p => calc
+                          ℕ.suc m ∸' ℕ.zero ∸' p = ℕ.suc m ∸' p             := congrArg (fun x ↦ x ∸' p) (monus.eq_1 m.suc)
+                          _                      = ℕ.suc m ∸' (ℕ.zero +' p) := congrArg (fun x ↦ ℕ.suc m ∸' x) (add.eq_1 p)
+| ℕ.suc m, ℕ.suc n, p => calc
+                           ℕ.suc m ∸' ℕ.suc n ∸' p = m ∸' n ∸' p               := congrArg (fun x ↦ x ∸' p) (monus.eq_3 m n)
+                           _                       = m ∸' (n +' p)             := monus_add_assoc m n p
+                           _                       = ℕ.suc m ∸' ℕ.suc (n +' p) := Eq.symm $ monus.eq_3 m (n +' p)
+                           _                       = ℕ.suc m ∸' (ℕ.suc n +' p) := congrArg (fun x ↦ ℕ.suc m ∸' x) (Eq.symm $ add.eq_2 p n)
 
 
 end Plfl.Part1.Induction
