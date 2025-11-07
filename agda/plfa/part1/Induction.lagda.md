@@ -985,7 +985,65 @@ for all naturals `m` and `n`.  As with commutativity of addition,
 you will need to formulate and prove suitable lemmas.
 
 ```agda
--- Your code goes here
+*-zero : ∀ (m : ℕ) → m * zero ≡ zero
+*-zero zero = refl
+*-zero (suc m) =
+  begin
+    suc m * zero
+  ≡⟨⟩
+    zero + m * zero
+  ≡⟨⟩
+    m * zero
+  ≡⟨ *-zero m ⟩
+    zero
+  ∎
+
+*-suc : ∀ (m n : ℕ) → m * suc n ≡ m + m * n
+*-suc zero n = refl
+*-suc (suc m) n =
+  begin
+    suc m * suc n
+  ≡⟨⟩
+    suc n + m * suc n
+  ≡⟨ cong (suc n +_) (*-suc m n) ⟩
+    suc n + (m + m * n)
+  ≡⟨ sym (+-assoc (suc n) m (m * n)) ⟩
+    suc n + m + m * n
+  ≡⟨⟩
+    suc (n + m) + m * n
+  ≡⟨ cong (_+ m * n) (sym (+-suc n m)) ⟩
+    n + suc m + m * n
+  ≡⟨ +-assoc n (suc m) (m * n) ⟩
+    n + (suc m + m * n)
+  ≡⟨ cong (n +_) (+-comm (suc m) (m * n)) ⟩
+    n + (m * n + suc m)
+  ≡⟨ sym (+-assoc n (m * n) (suc m)) ⟩
+    n + m * n + suc m
+  ≡⟨⟩
+    suc m * n + suc m
+  ≡⟨ +-comm (suc m * n) (suc m) ⟩
+    suc m + suc m * n
+  ∎
+
+*-comm : ∀ (m n : ℕ) → m * n ≡ n * m
+*-comm zero n =
+  begin
+    zero * n
+  ≡⟨⟩
+    zero
+  ≡⟨ sym (*-zero n) ⟩
+    n * zero
+  ∎
+*-comm (suc m) n =
+  begin
+    suc m * n
+  ≡⟨⟩
+    n + m * n
+  ≡⟨ cong (n +_) (*-comm m n) ⟩
+    n + n * m
+  ≡⟨ sym (*-suc n m) ⟩ 
+    n * suc m
+  ∎
 ```
 
 
