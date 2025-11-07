@@ -890,7 +890,20 @@ just apply the previous results which show addition
 is associative and commutative.
 
 ```agda
--- Your code goes here
++-swap : ∀ (m n p : ℕ) → m + (n + p) ≡ n + (m + p)
++-swap m n p =
+  begin
+    m + (n + p)
+  ≡⟨ +-comm m (n + p) ⟩
+    (n + p) + m
+  ≡⟨ +-assoc n p m ⟩
+    n + (p + m)
+  ≡⟨ cong (n +_) (+-comm p m) ⟩
+    n + (m + p)
+  ∎
+
++-swap′ : ∀ (m n p : ℕ) → m + (n + p) ≡ n + (m + p)
++-swap′ m n p rewrite +-comm m (n + p) | +-assoc n p m | cong (n +_) (+-comm p m) = refl
 ```
 
 
@@ -903,7 +916,31 @@ Show multiplication distributes over addition, that is,
 for all naturals `m`, `n`, and `p`.
 
 ```agda
--- Your code goes here
+*-distrib-+ : ∀ (m n p : ℕ) → (m + n) * p ≡ m * p + n * p
+*-distrib-+ zero n p =
+  begin
+    (zero + n) * p
+  ≡⟨⟩
+    n * p
+  ≡⟨⟩
+    zero + n * p
+  ≡⟨⟩ 
+    zero * p + n * p
+  ∎
+*-distrib-+ (suc m) n p =
+  begin
+    (suc m + n) * p
+  ≡⟨⟩
+    suc (m + n) * p
+  ≡⟨⟩
+    p + (m + n) * p
+  ≡⟨ cong (p +_) (*-distrib-+ m n p) ⟩
+    p + (m * p + n * p)
+  ≡⟨ sym (+-assoc p (m * p) (n * p)) ⟩
+    p + m * p + n * p
+  ≡⟨⟩
+    suc m * p + n * p
+  ∎
 ```
 
 
@@ -916,7 +953,15 @@ Show multiplication is associative, that is,
 for all naturals `m`, `n`, and `p`.
 
 ```agda
--- Your code goes here
+{-
+*-assoc : ∀ (m n p : ℕ) → (m * n) * p ≡ m * (n * p)
+*-assoc zero n p = refl
+*-assoc (suc m) n p =
+  begin
+     (suc m) n p 
+   ≡⟨ ? ⟩
+     suc m * (n * p)
+-}
 ```
 
 
