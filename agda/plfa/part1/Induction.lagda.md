@@ -1056,7 +1056,9 @@ Show
 for all naturals `n`. Did your proof require induction?
 
 ```agda
--- Your code goes here
+0∸n≡0 : ∀ (n : ℕ) → zero ∸ n ≡ zero
+0∸n≡0 zero = refl
+0∸n≡0 (suc n) = refl
 ```
 
 
