@@ -243,13 +243,20 @@ partial order but not a total order.
 Give an example of a preorder that is not a partial order.
 
 ```agda
--- Your code goes here
+data B : Set where
+  T : B
+  F : B
+
+data _implies_ (m n : B) : Set where
+  timpt : m ≡ n → m implies n
+  fimpx : m ≡ F → m implies n
 ```
 
 Give an example of a partial order that is not a total order.
 
 ```agda
--- Your code goes here
+data _divides_ (n m : ℕ) : Set where
+  divs : n Data.Nat.% suc m ≡ 0 → n divides m
 ```
 
 ## Reflexivity
