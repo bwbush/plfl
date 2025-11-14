@@ -128,10 +128,6 @@ inductive le : Nat → Nat → Prop where
 | sles {m n : Nat} : le m n → le m.succ n.succ
 open le
 
-inductive lt' : Nat → Nat → Prop where
-| zlt {n : Nat} : lt' Nat.zero n.succ
-| slts {m n : Nat} : lt' m n → lt' m.succ n.succ
-
 /--
 Strict inequality implies non-strict inequality.
 -/
@@ -149,3 +145,24 @@ theorem le_implies_lt : ∀ (m n : Nat), lt m n → le m.succ n := by
   match m, hmn with
   | Nat.zero, zlt => exact sles zle
   | Nat.succ m', slts h => exact sles (le_implies_lt _ _ h)
+
+
+-- Proof of transitivity of non-strict equality.
+
+private theorem le_trans {m n p : Nat} : le m n → le n p → le m p
+| zle, _ => zle
+| sles mlen, sles nlep => sles (le_trans mlen nlep)
+
+private theorem le_succ (n : Nat) : le n n.succ := by
+  induction n with
+  | zero => exact zle
+  | succ m ih => exact sles ih
+
+/--
+Strict equality is transitive.
+-/
+theorem lt_trans₅ (m n p : Nat) : lt m n → lt n p → lt m p := by
+  intros hmn hnp
+  apply lt_implies_le
+  have lenns : le n n.succ := le_succ n
+  exact le_trans (le_trans (le_implies_lt m n hmn) lenns) (le_implies_lt n p hnp)
