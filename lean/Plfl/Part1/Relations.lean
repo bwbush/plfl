@@ -26,7 +26,7 @@ inductive divides (m n : Nat) : Prop where
 Less than.
 -/
 inductive lt : Nat → Nat → Prop where
-| zlt {n : Nat} : lt Nat.zero n
+| zlt {n : Nat} : lt Nat.zero n.succ
 | slts {m n : Nat} : lt m n → lt m.succ n.succ
 open lt
 
@@ -34,27 +34,29 @@ open lt
 Strict inequality is transitive.
 -/
 theorem lt_trans₁ {m n p : Nat} : lt m n → lt n p → lt m p
-| zlt, _ => zlt
+| zlt, slts _ => zlt
 | slts mltn, slts nltp => slts (lt_trans₁ mltn nltp)
 
 #print lt_trans₁
 
 theorem lt_trans₂ (m n p : Nat) (hmn : lt m n) (hnp : lt n p) : lt m p :=
   match m, n, p, hmn, hnp with
-  | Nat.zero, _, _, _, _ => zlt
+  | Nat.zero, _, Nat.succ _, _, _ => zlt
   | Nat.succ m', Nat.succ n', Nat.succ p', slts h1, slts h2 => slts (lt_trans₂ m' n' p' h1 h2)
 
 theorem lt_trans₃ {m n p : Nat} : lt m n → lt n p → lt m p := by
   intros hmn hnp
   match hmn with
-  | zlt => exact zlt
+  | zlt => cases hnp with
+           | slts _ => exact zlt
   | slts hmn' => cases hnp with
                  | slts hnp' => exact slts (lt_trans₃ hmn' hnp')
 
 theorem lt_trans₄ {m n p : Nat} : lt m n → lt n p → lt m p := by
   intros hmn hnp
   induction hmn generalizing p with
-  | zlt => exact zlt
+  | zlt => cases hnp with
+           | slts _ => exact zlt
   | slts hmn' ih => cases hnp with
                     | slts hnp' => exact slts (ih hnp')
 
@@ -86,7 +88,7 @@ Strict inequality is trichotomous.
 theorem lt_trichotomy (m n : Nat) : @LtTrichotomy m n :=
   match m, n with
   | Nat.zero   , Nat.zero    => teq rfl
-  | Nat.zero   , _           => tlt zlt
+  | Nat.zero   , Nat.succ _  => tlt zlt
   | _          , Nat.zero    => tgt zgt
   | Nat.succ m', Nat.succ n' => match lt_trichotomy m' n' with
                                 | tlt z => tlt (slts z)
@@ -97,11 +99,53 @@ theorem lt_trichotomy (m n : Nat) : @LtTrichotomy m n :=
 
 -- Monotonocity for strict inequality.
 
-theorem add_monor_lt : ∀ (k m n : Nat), lt m n → lt (k + m) (k + n) := by
-  intros k m n hmn
-  match k, m, n, hmn with
-  | Nat.zero, m', n', hmn => rw [Nat.zero_add m', Nat.zero_add n']
-                             exact hmn
-  | Nat.succ k', m', n', hmn => have h : lt (k' + m').succ (k' + n').succ := slts (add_monor_lt k' m' n' hmn)
-                                rw [Nat.succ_add k' m', Nat.succ_add k' n']
-                                exact h
+theorem add_monor_lt : ∀ (n p q : Nat), lt p q → lt (n + p) (n + q) := by
+  intros n p q hpq
+  match n with
+  | Nat.zero => rw [Nat.zero_add p, Nat.zero_add q]
+                exact hpq
+  | Nat.succ n' => have h : lt (n' + p).succ (n' + q).succ := slts (add_monor_lt n' p q hpq)
+                   rw [Nat.succ_add n' p, Nat.succ_add n' q]
+                   exact h
+
+theorem add_monol_lt : ∀ (m n p : Nat), lt m n → lt (m + p) (n + p) := by
+  intros m n p hmn
+  rw [Nat.add_comm m p, Nat.add_comm n p]
+  exact add_monor_lt p m n hmn
+
+theorem add_mono_lt : ∀ (m n p q : Nat), lt m n → lt p q → lt (m + p) (n + q) := by
+  intros m n p q hmn hpq
+  exact lt_trans₁ (add_monol_lt m n p hmn) (add_monor_lt n p q hpq)
+
+
+-- Strict implies non-strict inequality.
+
+/--
+Less than or equal to.
+-/
+inductive le : Nat → Nat → Prop where
+| zle {n : Nat} : le Nat.zero n
+| sles {m n : Nat} : le m n → le m.succ n.succ
+open le
+
+inductive lt' : Nat → Nat → Prop where
+| zlt {n : Nat} : lt' Nat.zero n.succ
+| slts {m n : Nat} : lt' m n → lt' m.succ n.succ
+
+/--
+Strict inequality implies non-strict inequality.
+-/
+theorem lt_implies_le : ∀ (m n : Nat), le m.succ n → lt m n := by
+  intros m n hmn
+  match m, hmn with
+  | Nat.zero, sles _ => exact zlt
+  | Nat.succ m', sles h => exact slts (lt_implies_le _ _ h)
+
+/--
+Non-strict inequality implies strict inequality.
+-/
+theorem le_implies_lt : ∀ (m n : Nat), lt m n → le m.succ n := by
+  intros m n hmn
+  match m, hmn with
+  | Nat.zero, zlt => exact sles zle
+  | Nat.succ m', slts h => exact sles (le_implies_lt _ _ h)
