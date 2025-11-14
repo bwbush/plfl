@@ -23,12 +23,11 @@ inductive divides (m n : Nat) : Prop where
 -- Strict inequality is transitive.
 
 /--
-Strict inequality.
+Less than.
 -/
 inductive lt : Nat → Nat → Prop where
 | zlt {n : Nat} : lt Nat.zero n
 | slts {m n : Nat} : lt m n → lt m.succ n.succ
-
 open lt
 
 /--
@@ -37,6 +36,8 @@ Strict inequality is transitive.
 theorem lt_trans₁ {m n p : Nat} : lt m n → lt n p → lt m p
 | zlt, _ => zlt
 | slts mltn, slts nltp => slts (lt_trans₁ mltn nltp)
+
+#print lt_trans₁
 
 theorem lt_trans₂ (m n p : Nat) (hmn : lt m n) (hnp : lt n p) : lt m p :=
   match m, n, p, hmn, hnp with
@@ -52,8 +53,43 @@ theorem lt_trans₃ {m n p : Nat} : lt m n → lt n p → lt m p := by
 
 theorem lt_trans₄ {m n p : Nat} : lt m n → lt n p → lt m p := by
   intros hmn hnp
-  induction hmn with
+  induction hmn generalizing p with
   | zlt => exact zlt
-  | slts hmn' ih => match p with
-                    | Nat.zero => contradiction
-                    | Nat.succ p' => sorry
+  | slts hmn' ih => cases hnp with
+                    | slts hnp' => exact slts (ih hnp')
+
+#print lt_trans₄
+
+
+-- Trichotomy for strict inequality
+
+/--
+Greater than.
+-/
+inductive gt : Nat → Nat → Prop where
+| zgt {n : Nat} : gt n Nat.zero
+| sgts {m n : Nat} : gt m n → gt m.succ n.succ
+open gt
+
+/--
+Helper type for trichotomy of strict inequality.
+-/
+inductive LtTrichotomy : Nat → Nat → Prop where
+| tlt {m n : Nat} : lt m n → LtTrichotomy m n
+| teq {m n : Nat} : m = n → LtTrichotomy m n
+| tgt {m n : Nat} : gt m n → LtTrichotomy m n
+open LtTrichotomy
+
+/--
+Strict inequality is trichotomous.
+-/
+theorem lt_trichotomy (m n : Nat) : @LtTrichotomy m n :=
+  match m, n with
+  | Nat.zero   , Nat.zero    => teq rfl
+  | Nat.zero   , _           => tlt zlt
+  | _          , Nat.zero    => tgt zgt
+  | Nat.succ m', Nat.succ n' => match lt_trichotomy m' n' with
+                                | tlt z => tlt (slts z)
+                                | teq z => have h : m'.succ = n'.succ := by rw [z]
+                                           teq h
+                                | tgt z => tgt (sgts z)
