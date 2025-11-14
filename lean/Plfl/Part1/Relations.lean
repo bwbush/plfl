@@ -61,7 +61,7 @@ theorem lt_trans₄ {m n p : Nat} : lt m n → lt n p → lt m p := by
 #print lt_trans₄
 
 
--- Trichotomy for strict inequality
+-- Trichotomy for strict inequality.
 
 /--
 Greater than.
@@ -93,3 +93,15 @@ theorem lt_trichotomy (m n : Nat) : @LtTrichotomy m n :=
                                 | teq z => have h : m'.succ = n'.succ := by rw [z]
                                            teq h
                                 | tgt z => tgt (sgts z)
+
+
+-- Monotonocity for strict inequality.
+
+theorem add_monor_lt : ∀ (k m n : Nat), lt m n → lt (k + m) (k + n) := by
+  intros k m n hmn
+  match k, m, n, hmn with
+  | Nat.zero, m', n', hmn => rw [Nat.zero_add m', Nat.zero_add n']
+                             exact hmn
+  | Nat.succ k', m', n', hmn => have h : lt (k' + m').succ (k' + n').succ := slts (add_monor_lt k' m' n' hmn)
+                                rw [Nat.succ_add k' m', Nat.succ_add k' n']
+                                exact h
