@@ -662,7 +662,25 @@ Show that addition is monotonic with respect to strict inequality.
 As with inequality, some additional definitions may be required.
 
 ```agda
--- Your code goes here
++-monoʳ-< : ∀ (n p q : ℕ)
+  → p < q
+    -------------
+  → n + p < n + q
++-monoʳ-< zero    p q p<q  =  p<q
++-monoʳ-< (suc n) p q p<q  =  s<s (+-monoʳ-< n p q p<q)
+
++-monoˡ-< : ∀ (m n p : ℕ)
+  → m < n
+    -------------
+  → m + p < n + p
++-monoˡ-< m n p m<n  rewrite +-comm m p | +-comm n p  = +-monoʳ-< p m n m<n
+
++-mono-< : ∀ (m n p q : ℕ)
+  → m < n
+  → p < q
+    -------------
+  → m + p < n + q
++-mono-< m n p q m<n p<q  =  <-trans (+-monoˡ-< m n p m<n) (+-monoʳ-< n p q p<q)
 ```
 
 #### Exercise `≤→<, <→≤` (recommended) {#leq-iff-less}
@@ -670,7 +688,13 @@ As with inequality, some additional definitions may be required.
 Show that `suc m ≤ n` implies `m < n`, and conversely.
 
 ```agda
--- Your code goes here
+≤→< : ∀ (m n : ℕ) → suc m ≤ n → m < n
+≤→< zero _ (s≤s _) = z<s
+≤→< (suc m') _ (s≤s h) = s<s (≤→< _ _ h)
+
+<→≤ : ∀ (m n : ℕ) → m < n → suc m ≤ n
+<→≤ zero _ z<s = s≤s z≤n
+<→≤ (suc m') _ (s<s h) = s≤s (<→≤ _ _ h)
 ```
 
 #### Exercise `<-trans-revisited` (practice) {#less-trans-revisited}
