@@ -110,10 +110,6 @@ def monus : ℕ → ℕ → ℕ
 | suc i, suc j => monus i j
 infixl:100 " ∸' " => monus
 
-#check monus.eq_1
-#check monus.eq_2
-#check monus.eq_3
-
 #guard toNat (fromNat 3 ∸' fromNat 1) = 2
 #guard toNat (fromNat 3 ∸' fromNat 4) = 0
 

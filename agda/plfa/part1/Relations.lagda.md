@@ -243,13 +243,20 @@ partial order but not a total order.
 Give an example of a preorder that is not a partial order.
 
 ```agda
--- Your code goes here
+data B : Set where
+  T : B
+  F : B
+
+data _implies_ (m n : B) : Set where
+  timpt : m ≡ n → m implies n
+  fimpx : m ≡ F → m implies n
 ```
 
 Give an example of a partial order that is not a total order.
 
 ```agda
--- Your code goes here
+data _divides_ (n m : ℕ) : Set where
+  divs : n Data.Nat.% suc m ≡ 0 → n divides m
 ```
 
 ## Reflexivity
@@ -600,7 +607,9 @@ Show that strict inequality is transitive. Use a direct proof. (A later
 exercise exploits the relation between < and ≤.)
 
 ```agda
--- Your code goes here
+<-trans : ∀ {m n p : ℕ} → m < n → n < p → m < p
+<-trans z<s (s<s _) = z<s
+<-trans (s<s mltn) (s<s nltp) = s<s (<-trans mltn nltp)
 ```
 
 #### Exercise `trichotomy` (practice) {#trichotomy}
@@ -618,7 +627,33 @@ similar to that used for totality.
 [negation](/Negation/).)
 
 ```agda
--- Your code goes here
+infix 4 _>_
+
+data _>_ : ℕ → ℕ → Set where
+  z>s : ∀ {n : ℕ}
+      ------------
+    → suc n > zero
+  s>s : ∀ {m n : ℕ}
+    → m > n
+      -------------
+    → suc m > suc n
+
+data LtTrichotomy : ℕ → ℕ → Set where
+  tlt : ∀ {m n : ℕ} → m < n → LtTrichotomy m n
+  teq : ∀ {m n : ℕ} → m ≡ n → LtTrichotomy m n
+  tgt : ∀ {m n : ℕ} → m > n → LtTrichotomy m n
+
+<-trichotomy : (m n : ℕ) → LtTrichotomy m n
+<-trichotomy zero zero = teq refl
+<-trichotomy zero (suc _) = tlt z<s
+<-trichotomy (suc _) zero = tgt z>s
+<-trichotomy (suc m') (suc n') with <-trichotomy m' n'
+...                               | tlt z = tlt (s<s z)
+...                               | teq z = teq h
+                                              where
+                                                h : suc m' ≡ suc n'
+                                                h = cong suc z
+...                               | tgt z = tgt (s>s z)
 ```
 
 #### Exercise `+-mono-<` (practice) {#plus-mono-less}
@@ -627,7 +662,25 @@ Show that addition is monotonic with respect to strict inequality.
 As with inequality, some additional definitions may be required.
 
 ```agda
--- Your code goes here
++-monoʳ-< : ∀ (n p q : ℕ)
+  → p < q
+    -------------
+  → n + p < n + q
++-monoʳ-< zero    p q p<q  =  p<q
++-monoʳ-< (suc n) p q p<q  =  s<s (+-monoʳ-< n p q p<q)
+
++-monoˡ-< : ∀ (m n p : ℕ)
+  → m < n
+    -------------
+  → m + p < n + p
++-monoˡ-< m n p m<n  rewrite +-comm m p | +-comm n p  = +-monoʳ-< p m n m<n
+
++-mono-< : ∀ (m n p q : ℕ)
+  → m < n
+  → p < q
+    -------------
+  → m + p < n + q
++-mono-< m n p q m<n p<q  =  <-trans (+-monoˡ-< m n p m<n) (+-monoʳ-< n p q p<q)
 ```
 
 #### Exercise `≤→<, <→≤` (recommended) {#leq-iff-less}
@@ -635,7 +688,13 @@ As with inequality, some additional definitions may be required.
 Show that `suc m ≤ n` implies `m < n`, and conversely.
 
 ```agda
--- Your code goes here
+≤→< : ∀ (m n : ℕ) → suc m ≤ n → m < n
+≤→< zero _ (s≤s _) = z<s
+≤→< (suc m') _ (s≤s h) = s<s (≤→< _ _ h)
+
+<→≤ : ∀ (m n : ℕ) → m < n → suc m ≤ n
+<→≤ zero _ z<s = s≤s z≤n
+<→≤ (suc m') _ (s<s h) = s≤s (<→≤ _ _ h)
 ```
 
 #### Exercise `<-trans-revisited` (practice) {#less-trans-revisited}
@@ -645,8 +704,23 @@ using the relation between strict inequality and inequality and
 the fact that inequality is transitive.
 
 ```agda
--- Your code goes here
-```
+<-trans₅ : ∀ (m n p : ℕ) → m < n → n < p → m < p
+<-trans₅ m n p hmn hnp = ≤→< m p h4
+  where
+    ≤-suc : (k : ℕ) → k ≤ suc k
+    ≤-suc zero    = z≤n
+    ≤-suc (suc k) = s≤s (≤-suc k)    
+    n≤ns : n ≤ suc n
+    n≤ns = ≤-suc n
+    h1 : suc m ≤ n
+    h1 = <→≤ m n hmn
+    h2 : suc n ≤ p
+    h2 = <→≤ n p hnp
+    h3 : suc m ≤ suc n
+    h3 = ≤-trans h1 n≤ns
+    h4 : suc m ≤ p
+    h4 = ≤-trans h3 h2
+    ```
 
 
 ## Even and odd
