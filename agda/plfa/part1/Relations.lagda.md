@@ -705,18 +705,21 @@ the fact that inequality is transitive.
 
 ```agda
 <-trans₅ : ∀ (m n p : ℕ) → m < n → n < p → m < p
-<-trans₅ m n p hmn hnp = <→≤ m p finalProof
+<-trans₅ m n p hmn hnp = ≤→< m p h4
   where
+    ≤-suc : (k : ℕ) → k ≤ suc k
+    ≤-suc zero    = z≤n
+    ≤-suc (suc k) = s≤s (≤-suc k)    
     n≤ns : n ≤ suc n
-    n≤ns = ?
+    n≤ns = ≤-suc n
     h1 : suc m ≤ n
     h1 = <→≤ m n hmn
     h2 : suc n ≤ p
     h2 = <→≤ n p hnp
     h3 : suc m ≤ suc n
-    h3 = ≤-trans (suc m) n (suc n) h1 n≤ns
-    finalProof : suc m ≤ p
-    finalProof = <-trans (suc m) (suc n) p h3 h2
+    h3 = ≤-trans h1 n≤ns
+    h4 : suc m ≤ p
+    h4 = ≤-trans h3 h2
     ```
 
 
