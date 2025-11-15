@@ -607,7 +607,9 @@ Show that strict inequality is transitive. Use a direct proof. (A later
 exercise exploits the relation between < and ≤.)
 
 ```agda
--- Your code goes here
+<-trans : ∀ {m n p : ℕ} → m < n → n < p → m < p
+<-trans z<s (s<s _) = z<s
+<-trans (s<s mltn) (s<s nltp) = s<s (<-trans mltn nltp)
 ```
 
 #### Exercise `trichotomy` (practice) {#trichotomy}
@@ -625,7 +627,33 @@ similar to that used for totality.
 [negation](/Negation/).)
 
 ```agda
--- Your code goes here
+infix 4 _>_
+
+data _>_ : ℕ → ℕ → Set where
+  z>s : ∀ {n : ℕ}
+      ------------
+    → suc n > zero
+  s>s : ∀ {m n : ℕ}
+    → m > n
+      -------------
+    → suc m > suc n
+
+data LtTrichotomy : ℕ → ℕ → Set where
+  tlt : ∀ {m n : ℕ} → m < n → LtTrichotomy m n
+  teq : ∀ {m n : ℕ} → m ≡ n → LtTrichotomy m n
+  tgt : ∀ {m n : ℕ} → m > n → LtTrichotomy m n
+
+<-trichotomy : (m n : ℕ) → LtTrichotomy m n
+<-trichotomy zero zero = teq refl
+<-trichotomy zero (suc _) = tlt z<s
+<-trichotomy (suc _) zero = tgt z>s
+<-trichotomy (suc m') (suc n') with <-trichotomy m' n'
+...                               | tlt z = tlt (s<s z)
+...                               | teq z = teq h
+                                              where
+                                                h : suc m' ≡ suc n'
+                                                h = cong suc z
+...                               | tgt z = tgt (s>s z)
 ```
 
 #### Exercise `+-mono-<` (practice) {#plus-mono-less}
