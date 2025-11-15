@@ -704,8 +704,20 @@ using the relation between strict inequality and inequality and
 the fact that inequality is transitive.
 
 ```agda
--- Your code goes here
-```
+<-trans₅ : ∀ (m n p : ℕ) → m < n → n < p → m < p
+<-trans₅ m n p hmn hnp = <→≤ m p finalProof
+  where
+    n≤ns : n ≤ suc n
+    n≤ns = ?
+    h1 : suc m ≤ n
+    h1 = <→≤ m n hmn
+    h2 : suc n ≤ p
+    h2 = <→≤ n p hnp
+    h3 : suc m ≤ suc n
+    h3 = ≤-trans (suc m) n (suc n) h1 n≤ns
+    finalProof : suc m ≤ p
+    finalProof = <-trans (suc m) (suc n) p h3 h2
+    ```
 
 
 ## Even and odd

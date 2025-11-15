@@ -69,7 +69,7 @@ theorem lt_trans₄ {m n p : Nat} : lt m n → lt n p → lt m p := by
 Greater than.
 -/
 inductive gt : Nat → Nat → Prop where
-| zgt {n : Nat} : gt n Nat.zero
+| zgt {n : Nat} : gt n.succ Nat.zero
 | sgts {m n : Nat} : gt m n → gt m.succ n.succ
 open gt
 
@@ -89,7 +89,7 @@ theorem lt_trichotomy (m n : Nat) : @LtTrichotomy m n :=
   match m, n with
   | Nat.zero   , Nat.zero    => teq rfl
   | Nat.zero   , Nat.succ _  => tlt zlt
-  | _          , Nat.zero    => tgt zgt
+  | Nat.succ _ , Nat.zero    => tgt zgt
   | Nat.succ m', Nat.succ n' => match lt_trichotomy m' n' with
                                 | tlt z => tlt (slts z)
                                 | teq z => have h : m'.succ = n'.succ := by rw [z]
@@ -131,20 +131,20 @@ open le
 /--
 Strict inequality implies non-strict inequality.
 -/
-theorem lt_implies_le : ∀ (m n : Nat), le m.succ n → lt m n := by
+theorem le_implies_lt : ∀ (m n : Nat), le m.succ n → lt m n := by
   intros m n hmn
   match m, hmn with
   | Nat.zero, sles _ => exact zlt
-  | Nat.succ m', sles h => exact slts (lt_implies_le _ _ h)
+  | Nat.succ m', sles h => exact slts (le_implies_lt _ _ h)
 
 /--
 Non-strict inequality implies strict inequality.
 -/
-theorem le_implies_lt : ∀ (m n : Nat), lt m n → le m.succ n := by
+theorem lt_implies_le : ∀ (m n : Nat), lt m n → le m.succ n := by
   intros m n hmn
   match m, hmn with
   | Nat.zero, zlt => exact sles zle
-  | Nat.succ m', slts h => exact sles (le_implies_lt _ _ h)
+  | Nat.succ m', slts h => exact sles (lt_implies_le _ _ h)
 
 
 -- Proof of transitivity of non-strict equality.
@@ -163,6 +163,15 @@ Strict equality is transitive.
 -/
 theorem lt_trans₅ (m n p : Nat) : lt m n → lt n p → lt m p := by
   intros hmn hnp
-  apply lt_implies_le
+  apply le_implies_lt
   have lenns : le n n.succ := le_succ n
-  exact le_trans (le_trans (le_implies_lt m n hmn) lenns) (le_implies_lt n p hnp)
+  exact le_trans (le_trans (lt_implies_le m n hmn) lenns) (lt_implies_le n p hnp)
+
+theorem lt_trans₆ (m n p : Nat) (hmn : lt m n) (hnp : lt n p) : lt m p := by
+  apply le_implies_lt
+  have h1 : le m.succ n := lt_implies_le m n hmn
+  have h2 : le n.succ p := lt_implies_le n p hnp
+  have h_bridge : le n n.succ := le_succ n
+  have h3 : le m.succ n.succ := le_trans h1 h_bridge
+  have h4 : le m.succ p := le_trans h3 h2
+  exact h4
